@@ -1,0 +1,20 @@
+# AGENTS.md
+- Use TanStack Start file routes and server functions (not Next.js) to stay on Lovable's supported runtime.
+- Keep AI gateway and PayPal calls in *.server.ts modules loaded inside handlers so credentials never reach the browser.
+- Marketplace writes that move money or state (offers, conversations, transactions, request status) go through server functions using the admin client after verifying the caller; clients only read via RLS.
+- Roles live in user_roles (buyer/seller chosen once via choose_role RPC; admin granted by bootstrap_account allowlist), never on profiles.
+- Sellers are rows in provider_agents: demo rows (is_demo) are answered by an AI agent; a real seller can own several rows (owner_id, capped server-side) and listing fns take an explicit listing id.
+- Commission math and seller scoring live in src/lib/market.ts so UI and server share one source of truth.
+- Checkout receipt styling is scoped to the payment page; payment actions remain PayPal SDK-rendered controls so shown methods reflect actual eligibility.
+- Escrow "Held" is an app-level state on transactions; payouts to sellers are manual and tracked via payout_status.
+- Each PayPal checkout attempt creates a fresh order (unique request id) so a stale or abandoned sandbox order is never reopened.
+- Pre-sale direct messages live in direct_threads/direct_messages (one thread per buyer+listing), separate from deal conversations which require a request and offer.
+- Direct message attachments use private direct-attachments storage with uploader/thread paths; server-validated messages reference those paths so only conversation participants can open files.
+- Use AI Elements for direct-message transcripts and composers, preserving domain-specific seller identity and authenticated private storage.
+- Conversation partner profiles are fetched through a participant-checked server function projecting safe fields only, never email.
+- Alias @vercel/oidc to src/lib/vercel-oidc-stub.ts in vite.config.ts; the AI SDK bundles it and its createRequire(import.meta.url) crashes the Worker on every request.
+- Deleting a listing retires it (is_active=false, deleted_at set) because past deals and payments reference it; owner lookups ignore retired rows.
+- Listing views/clicks are recorded in listing_events through a public deduplicating server function; only the listing owner (and admins) can read them.
+- Seller rating/review_count on provider_agents are derived from the reviews table by trigger (one review per confirmed conversation, written via server fn); never set ratings by hand, and unreviewed sellers score neutral in matching.
+- Support tickets live in support_tickets/support_messages; all writes go through support.functions.ts, admins answer from /admin/support.
+- Cookie consent is stored in localStorage (agentdeal_cookie_consent); the persistent listing-visitor ID is only kept after analytics consent.

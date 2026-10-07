@@ -1,0 +1,2 @@
+revoke execute on function public.is_participant(uuid,uuid), public.owns_agent(uuid,uuid), public.owns_request(uuid,uuid), public.seller_on_request(uuid,uuid), public.bootstrap_account(), public.choose_role(public.app_role) from public, anon;
+grant execute on function public.is_participant(uuid,uuid), public.owns_agent(uuid,uuid), public.owns_request(uuid,uuid), public.seller_on_request(uuid,uuid), public.bootstrap_account(), public.choose_role(public.app_role) to authenticated;
